@@ -8,6 +8,7 @@ class CartServices{
 
     private $session;
     private $repoProduct;
+    private $tva =0.2;
 
     public function __construct(SessionInterface $session, ProductRepository $repoProduct)
     {
@@ -62,6 +63,7 @@ class CartServices{
 
        public function updateCart($cart){
            $this->session->set('cart', $cart);
+           $this->session->set('cartData', $this->getFullCart());
     }
 
        public function getCart(){
@@ -83,18 +85,26 @@ class CartServices{
             if ($product) {
                 //produit rcupéré avec succés
                 //recupéré les donées et mettre dans un tableau
-                $fullCart[]=[
+                // [produit] [] 2 tab pour pas avoir confilit entre produit qui est numéroté (clé)et l'autre clé [data] 
+                $fullCart['products'][]=
+                [
                     "quantity" => $quantity,
-                    "product" => $product,
+                    "product" => $product
                 ];
-             
-
+                $quantity_cart += $quantity;
+                $subTotal += $quantity * $product->getPrice()/100;
             } else {
                 //id incorrecte
                 $this->deleteFromCart($id);
             }
-
         }
+
+        $fullCart['data'] = [
+            "quantity_cart" => $quantity_cart,
+            "subTotalHT" => $subTotal,
+            "Taxe" => round($subTotal * $this->tva,2),
+            "subTotalTTC" =>round ($subTotal + ($subTotal * $this->tva), 2),
+        ];
         return $fullCart;
     }
 

@@ -20,10 +20,13 @@ class CartController extends AbstractController
      */
     public function index( ): Response
     {
-       
+      
 
         $cart =$this-> cartServices->getFullCart();
-      
+        //! est ce que le panier est vide si oui dirige vers la page home
+        if (!$cart) {
+            return $this->redirectToRoute("home");
+        }
         return $this->render('cart/index.html.twig', [
             'cart' => $cart,
         ]);
